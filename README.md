@@ -9,5 +9,5 @@ learnus-dl -u username(학번) -p password video_url
 ```
 Windows executable
 ```
-learnus-dl.exe username(학번) -p password video_url
+learnus-dl.exe -u username(학번) -p password video_url
 ```
