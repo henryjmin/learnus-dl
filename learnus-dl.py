@@ -11,6 +11,7 @@ import m3u8
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", dest="username", action="store")
 parser.add_argument("-p", "--password", dest="password", action="store")
+parser.add_argument("-o", "--output", dest="output", action="store")
 parser.add_argument(dest="url", action="store")
 args = parser.parse_args()
 
@@ -162,13 +163,17 @@ with requests.Session() as s:
     res = s.get('https://ys.learnus.org/passni/spLoginProcess.php')
 
     res = s.get(args.url)
-    
+
     soup = BeautifulSoup(res.text, features='html.parser')
     m3u8_url = soup.find(
         'source', {'type': 'application/x-mpegURL'})['src']
     video_title = soup.find('meta', {'name': 'keywords'})[
         'content'].split(": ")[1]
-    file_name = video_title + ".mp4"
+
+    if args.output is None:
+        file_name = video_title + ".mp4"
+    else:
+        file_name = args.output
 
     playlist = get_playlist(m3u8_url)
     key = requests.get(playlist.keys[-1].absolute_uri).content
