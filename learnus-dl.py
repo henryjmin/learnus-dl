@@ -135,58 +135,64 @@ with requests.Session() as s:
     res = s.post('https://infra.yonsei.ac.kr/sso/PmSSOAuthService',
                  headers=header2, data=data4)
     soup = BeautifulSoup(res.text, features='html.parser')
-    e3 = soup.find('input', {'name': 'E3'})['value']
-    e4 = soup.find('input', {'name': 'E4'})['value']
-    s2 = soup.find('input', {'name': 'S2'})['value']
-    cltid = soup.find('input', {'name': 'CLTID'})['value']
-
-    data5 = {
-        'app_id': 'ednetYonsei',
-        'retUrl': 'https://ys.learnus.org',
-        'failUrl': 'https://ys.learnus.org/login/index.php',
-        'baseUrl': 'https://ys.learnus.org',
-        'loginUrl': 'https://ys.learnus.org/passni/sso/coursemosLogin.php',
-        'E3': e3,
-        'E4': e4,
-        'S2': s2,
-        'CLTID': cltid,
-        'ssoGubun': 'Login',
-        'refererUrl': 'https://ys.learnus.org',
-        'test': 'SSOAuthLogin',
-        'username': id,
-        'password': pw
-    }
-
-    res = s.post('https://ys.learnus.org/passni/sso/spLoginData.php',
-                 headers=header3, data=data5)
-
-    res = s.get('https://ys.learnus.org/passni/spLoginProcess.php')
-
-    res = s.get(args.url)
-
-    soup = BeautifulSoup(res.text, features='html.parser')
-    m3u8_url = soup.find(
-        'source', {'type': 'application/x-mpegURL'})['src']
-    video_title = soup.find('meta', {'name': 'keywords'})[
-        'content'].split(": ")[1]
-
-    if args.output is None:
-        file_name = video_title + ".mp4"
+    if soup.find('input', {'name': 'E3'}) is None:
+        print("Login Failed!")
     else:
-        file_name = args.output
+        e3 = soup.find('input', {'name': 'E3'})['value']
+        e4 = soup.find('input', {'name': 'E4'})['value']
+        s2 = soup.find('input', {'name': 'S2'})['value']
+        cltid = soup.find('input', {'name': 'CLTID'})['value']
 
-    playlist = get_playlist(m3u8_url)
-    key = requests.get(playlist.keys[-1].absolute_uri).content
-    seq_len = len(playlist.segments)
+        data5 = {
+            'app_id': 'ednetYonsei',
+            'retUrl': 'https://ys.learnus.org',
+            'failUrl': 'https://ys.learnus.org/login/index.php',
+            'baseUrl': 'https://ys.learnus.org',
+            'loginUrl': 'https://ys.learnus.org/passni/sso/coursemosLogin.php',
+            'E3': e3,
+            'E4': e4,
+            'S2': s2,
+            'CLTID': cltid,
+            'ssoGubun': 'Login',
+            'refererUrl': 'https://ys.learnus.org',
+            'test': 'SSOAuthLogin',
+            'username': id,
+            'password': pw
+        }
 
-    for i in range(seq_len):
-        print("Downloading... ({}%)".format(round(i/seq_len*100, 2)))
-        seg = playlist.segments[i]
-        data = requests.get(seg.absolute_uri).content
-        iv = binify(i + 1)
-        data = decrypt_video(data, key, iv)
+        res = s.post('https://ys.learnus.org/passni/sso/spLoginData.php',
+                     headers=header3, data=data5)
 
-        with open(file_name, "ab" if i != 0 else "wb") as f:
-            f.write(data)
+        res = s.get('https://ys.learnus.org/passni/spLoginProcess.php')
 
-    print("Download Complete!")
+        res = s.get(args.url)
+
+        soup = BeautifulSoup(res.text, features='html.parser')
+        if soup.find('source', {'type': 'application/x-mpegURL'}) is None:
+            print("Not a valid video url!")
+        else:
+            m3u8_url = soup.find(
+                'source', {'type': 'application/x-mpegURL'})['src']
+            video_title = soup.find('meta', {'name': 'keywords'})[
+                'content'].split(": ")[1]
+
+            if args.output is None:
+                file_name = video_title + ".mp4"
+            else:
+                file_name = args.output
+
+            playlist = get_playlist(m3u8_url)
+            key = requests.get(playlist.keys[-1].absolute_uri).content
+            seq_len = len(playlist.segments)
+
+            for i in range(seq_len):
+                print("Downloading... ({}%)".format(round(i/seq_len*100, 2)))
+                seg = playlist.segments[i]
+                data = requests.get(seg.absolute_uri).content
+                iv = binify(i + 1)
+                data = decrypt_video(data, key, iv)
+
+                with open(file_name, "ab" if i != 0 else "wb") as f:
+                    f.write(data)
+
+            print("Download Complete!")
