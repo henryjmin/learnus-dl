@@ -3,3 +3,4 @@ bs4
 m3u8
 pycryptodome
 requests
+tqdm
