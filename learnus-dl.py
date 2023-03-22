@@ -7,6 +7,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import binascii
 import m3u8
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", dest="username", action="store")
@@ -185,8 +186,7 @@ with requests.Session() as s:
             key = requests.get(playlist.keys[-1].absolute_uri).content
             seq_len = len(playlist.segments)
 
-            for i in range(seq_len):
-                print("Downloading... ({}%)".format(round(i/seq_len*100, 2)))
+            for i in tqdm(range(seq_len)):
                 seg = playlist.segments[i]
                 data = requests.get(seg.absolute_uri).content
                 iv = binify(i + 1)
