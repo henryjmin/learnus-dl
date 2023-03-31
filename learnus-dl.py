@@ -174,8 +174,10 @@ with requests.Session() as s:
         else:
             m3u8_url = soup.find(
                 'source', {'type': 'application/x-mpegURL'})['src']
-            video_title = soup.find('meta', {'name': 'keywords'})[
-                'content'].split(": ")[1]
+            video_title = soup.find('div', id='vod_header').find('h1')
+            video_title.find('span').decompose()
+            video_title.find('span').decompose()
+            video_title = video_title.text.strip()
 
             if args.output is None:
                 file_name = video_title + ".mp4"
