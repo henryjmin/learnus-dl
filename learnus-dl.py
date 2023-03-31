@@ -179,6 +179,9 @@ with requests.Session() as s:
             video_title.find('span').decompose()
             video_title = video_title.text.strip()
 
+            fix_table = str.maketrans('\/:*?"<>|', '＼／：＊？＂＜＞｜')
+            video_title = video_title.translate(fix_table)
+            
             if args.output is None:
                 file_name = video_title + ".mp4"
             else:
