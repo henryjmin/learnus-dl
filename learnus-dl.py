@@ -175,8 +175,9 @@ with requests.Session() as s:
             m3u8_url = soup.find(
                 'source', {'type': 'application/x-mpegURL'})['src']
             video_title = soup.find('div', id='vod_header').find('h1')
-            video_title.find('span').decompose()
-            video_title.find('span').decompose()
+            spans = video_title.find_all('span')
+            for span in spans:
+                span.decompose()
             video_title = video_title.text.strip()
 
             fix_table = str.maketrans('\/:*?"<>|', '＼／：＊？＂＜＞｜')
