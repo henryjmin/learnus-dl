@@ -19,21 +19,6 @@ args = parser.parse_args()
 id = args.username
 pw = args.password
 
-header1 = {
-    'Referer': 'https://ys.learnus.org/login/method/sso.php',
-    'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0'
-}
-
-header2 = {
-    'Referer': 'https://ys.learnus.org/',
-    'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0'
-}
-
-header3 = {
-    'Referer': 'https://infra.yonsei.ac.kr/',
-    'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0'
-}
-
 data1 = {
     'ssoGubun': 'Login',
     'logintype': 'sso',
@@ -61,8 +46,7 @@ def binify(x):
 
 
 with requests.Session() as s:
-    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php',
-                 headers=header1, data=data1)
+    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data1)
     soup = BeautifulSoup(res.text, features='html.parser')
     s1 = soup.find('input', {'name': 'S1'})['value']
 
@@ -82,8 +66,7 @@ with requests.Session() as s:
         'password': pw
     }
 
-    res = s.post('https://infra.yonsei.ac.kr/sso/PmSSOService',
-                 headers=header2, data=data2)
+    res = s.post('https://infra.yonsei.ac.kr/sso/PmSSOService', data=data2)
     soup = BeautifulSoup(res.text, features='html.parser')
     sc = soup.find('input', {'name': 'ssoChallenge'})['value']
     km = soup.find('input', {'name': 'keyModulus'})['value']
@@ -107,8 +90,7 @@ with requests.Session() as s:
         'password': pw
     }
 
-    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php',
-                 headers=header3, data=data3)
+    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data3)
     soup = BeautifulSoup(res.text, features='html.parser')
     s1 = soup.find('input', {'name': 'S1'})['value']
     jsonStr = '{\"userid\":\"'+id+'\",\"userpw\":\"' + \
@@ -133,8 +115,7 @@ with requests.Session() as s:
         'password': pw
     }
 
-    res = s.post('https://infra.yonsei.ac.kr/sso/PmSSOAuthService',
-                 headers=header2, data=data4)
+    res = s.post('https://infra.yonsei.ac.kr/sso/PmSSOAuthService', data=data4)
     soup = BeautifulSoup(res.text, features='html.parser')
     if soup.find('input', {'name': 'E3'}) is None:
         print("Login Failed!")
@@ -161,8 +142,7 @@ with requests.Session() as s:
             'password': pw
         }
 
-        res = s.post('https://ys.learnus.org/passni/sso/spLoginData.php',
-                     headers=header3, data=data5)
+        res = s.post('https://ys.learnus.org/passni/sso/spLoginData.php', data=data5)
 
         res = s.get('https://ys.learnus.org/passni/spLoginProcess.php')
 
@@ -182,7 +162,7 @@ with requests.Session() as s:
 
             fix_table = str.maketrans('\/:*?"<>|', '＼／：＊？＂＜＞｜')
             video_title = video_title.translate(fix_table)
-            
+
             if args.output is None:
                 file_name = video_title + ".mp4"
             else:
