@@ -9,6 +9,24 @@ import binascii
 import m3u8
 from tqdm import tqdm
 
+
+def get_playlist(url):
+    tmp_playlist = m3u8.load(uri=url)
+    return tmp_playlist
+
+
+def decrypt_video(encrypted_data, key, iv):
+    encrypted_data = pad(data_to_pad=encrypted_data, block_size=AES.block_size)
+    aes = AES.new(key=key, mode=AES.MODE_CBC, iv=iv)
+    decrypted_data = aes.decrypt(encrypted_data)
+    return decrypted_data
+
+
+def binify(x):
+    h = hex(x)[2:].rstrip('L')
+    return binascii.unhexlify('0'*(32-len(h))+h)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", dest="username", action="store")
 parser.add_argument("-p", "--password", dest="password", action="store")
@@ -28,25 +46,9 @@ data1 = {
 }
 
 
-def get_playlist(url):
-    tmp_playlist = m3u8.load(uri=url)
-    return tmp_playlist
-
-
-def decrypt_video(encrypted_data, key, iv):
-    encrypted_data = pad(data_to_pad=encrypted_data, block_size=AES.block_size)
-    aes = AES.new(key=key, mode=AES.MODE_CBC, iv=iv)
-    decrypted_data = aes.decrypt(encrypted_data)
-    return decrypted_data
-
-
-def binify(x):
-    h = hex(x)[2:].rstrip('L')
-    return binascii.unhexlify('0'*(32-len(h))+h)
-
-
 with requests.Session() as s:
-    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data1)
+    res = s.post(
+        'https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data1)
     soup = BeautifulSoup(res.text, features='html.parser')
     s1 = soup.find('input', {'name': 'S1'})['value']
 
@@ -90,11 +92,11 @@ with requests.Session() as s:
         'password': pw
     }
 
-    res = s.post('https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data3)
+    res = s.post(
+        'https://ys.learnus.org/passni/sso/coursemosLogin.php', data=data3)
     soup = BeautifulSoup(res.text, features='html.parser')
     s1 = soup.find('input', {'name': 'S1'})['value']
-    jsonStr = '{\"userid\":\"'+id+'\",\"userpw\":\"' + \
-        pw+'\",\"ssoChallenge\":\"'+sc+'\"}'
+    jsonStr = '{"userid":"'+id+'","userpw":"'+pw+'","ssoChallenge":"'+sc+'"}'
     keyPair = RSA.construct((int(km, 16), 0x10001))
     cipher = PKCS1_v1_5.new(keyPair)
     e2 = cipher.encrypt(jsonStr.encode()).hex()
@@ -142,7 +144,8 @@ with requests.Session() as s:
             'password': pw
         }
 
-        res = s.post('https://ys.learnus.org/passni/sso/spLoginData.php', data=data5)
+        res = s.post(
+            'https://ys.learnus.org/passni/sso/spLoginData.php', data=data5)
 
         res = s.get('https://ys.learnus.org/passni/spLoginProcess.php')
 
