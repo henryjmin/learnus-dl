@@ -10,11 +10,6 @@ import m3u8
 from tqdm import tqdm
 
 
-def get_playlist(url):
-    tmp_playlist = m3u8.load(uri=url)
-    return tmp_playlist
-
-
 def decrypt_video(encrypted_data, key, iv):
     encrypted_data = pad(data_to_pad=encrypted_data, block_size=AES.block_size)
     aes = AES.new(key=key, mode=AES.MODE_CBC, iv=iv)
@@ -171,17 +166,16 @@ with requests.Session() as s:
             else:
                 file_name = args.output
 
-            playlist = get_playlist(m3u8_url)
+            playlist = m3u8.load(uri=m3u8_url)
             key = requests.get(playlist.keys[-1].absolute_uri).content
             seq_len = len(playlist.segments)
 
-            for i in tqdm(range(seq_len)):
-                seg = playlist.segments[i]
-                data = requests.get(seg.absolute_uri).content
-                iv = binify(i + 1)
-                data = decrypt_video(data, key, iv)
-
-                with open(file_name, "ab" if i != 0 else "wb") as f:
+            with open(file_name, "wb") as f:
+                for i in tqdm(range(seq_len)):
+                    seg = playlist.segments[i]
+                    data = requests.get(seg.absolute_uri).content
+                    iv = binify(i + 1)
+                    data = decrypt_video(data, key, iv)
                     f.write(data)
 
             print("Download Complete!")
