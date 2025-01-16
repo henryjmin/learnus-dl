@@ -5,7 +5,7 @@
 python 3.10 이상
 ```
 pip install -r requirements.txt
-python learnus-dl.py -u username(학번) -p password video_url
+python learnus-dl.py -u username(학번) -p password video_url_1 video_url_2 video_url_3
 ```
 Windows executable
 ```
