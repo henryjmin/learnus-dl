@@ -1,6 +1,5 @@
 beautifulsoup4
 bs4
-m3u8
+ffmpeg-python
 pycryptodome
 requests
-tqdm

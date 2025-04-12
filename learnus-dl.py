@@ -6,8 +6,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import binascii
-import m3u8
-from tqdm import tqdm
+import ffmpeg
 
 
 def decrypt_video(encrypted_data, key, iv):
@@ -158,7 +157,7 @@ with requests.Session() as s:
                 span.decompose()
             video_title = video_title.text.strip()
 
-            fix_table = str.maketrans('\/:*?"<>|', '＼／：＊？＂＜＞｜')
+            fix_table = str.maketrans('\\/:*?"<>|', '＼／：＊？＂＜＞｜')
             video_title = video_title.translate(fix_table)
 
             if args.output is None:
@@ -166,16 +165,11 @@ with requests.Session() as s:
             else:
                 file_name = args.output
 
-            playlist = m3u8.load(uri=m3u8_url)
-            key = requests.get(playlist.keys[-1].absolute_uri).content
-            seq_len = len(playlist.segments)
-
-            with open(file_name, "wb") as f:
-                for i in tqdm(range(seq_len)):
-                    seg = playlist.segments[i]
-                    data = requests.get(seg.absolute_uri).content
-                    iv = binify(i + 1)
-                    data = decrypt_video(data, key, iv)
-                    f.write(data)
+            (
+                ffmpeg
+                .input(m3u8_url)
+                .output(file_name, c='copy')
+                .run()
+            )
 
             print("Download Complete!")
