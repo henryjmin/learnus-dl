@@ -1,14 +1,33 @@
 # learnus-dl
 
-## 사용방법
+## Requirements
+python >= 3.10 (Optional for Windows)
 
-python 3.10 이상
+ffmpeg (Optional, recommended)
+```
+# Windows
+winget install ffmpeg
+
+# macOS
+brew install ffmpeg
+```
+## Usage
+
+Python script
 ```
 pip install -r requirements.txt
-python learnus-dl.py -u username(학번) -p password video_url
+./learnus-dl.py -u username(학번) -p password video_url
 ```
 Windows executable
 ```
 learnus-dl.exe -u username(학번) -p password video_url
 ```
-`-o filename.mp4` 를 추가하여 저장되는 파일명을 지정할 수 있습니다.
+Download as `output.mp4`
+```
+learnus-dl.exe -u username(학번) -p password -o output.mp4 video_url
+```
+
+## Build Windows executable
+```
+.\build-exe.bat
+```
